@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>نظام حجز قاعة الشيخ عبدالله الراجحي - مؤسسة عبدالله الراجحي الخيرية</title>
+    <link rel="icon" type="image/png" href="https://sekaya.org.sa/wp-content/uploads/2025/01/99.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'primary': '#0B1F3A',      // كحلي مؤسسي داكن
+              'secondary': '#C8A44A',    // ذهبي مؤسسي هادئ
+              'text-dark': '#0B1F3A',     // استخدام اللون الأساسي للنصوص
+              'background': '#F3F4F6',    // خلفية فاتحة رسمية
+              'light-gray': '#E5E7EB'     // درجة رمادي متناسقة
+            },
+            fontFamily: {
+              'cairo': ['Cairo', 'sans-serif']
+            }
+          }
+        }
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.3.0"
+  }
+}
+</script>
+</head>
+  <body class="bg-background font-cairo">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
