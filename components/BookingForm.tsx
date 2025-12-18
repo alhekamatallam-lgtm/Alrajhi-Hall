@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Booking, Room, Hospitality } from '../types';
+import { AlertTriangleIcon } from './icons/Icons';
 
 interface BookingFormProps {
   booking: Booking | null;
@@ -66,6 +67,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, rooms, hospitality, 
   const [startTime, setStartTime] = useState('');     // HH:mm
   const [endTime, setEndTime] = useState('');       // HH:mm
   const [emailPrefix, setEmailPrefix] = useState('');
+  const [conflictError, setConflictError] = useState<string | null>(null);
 
   const employeeNames = useMemo(() => [...new Set(allBookings.map(b => b['اسم الموظف']))].sort(), [allBookings]);
   const departments = useMemo(() => [...new Set(allBookings.map(b => b['الإدارة']))].sort(), [allBookings]);
@@ -121,6 +123,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, rooms, hospitality, 
   }, [formData['نوع الاجتماع'], hospitality]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    setConflictError(null);
     const { name, value } = e.target;
     
     setFormData(prev => ({
@@ -131,11 +134,42 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, rooms, hospitality, 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setConflictError(null);
 
-    // Combine date and time back into ISO strings
-    const fromISO = new Date(`${bookingDate}T${startTime}`).toISOString();
-    const toISO = new Date(`${bookingDate}T${endTime}`).toISOString();
+    if (!bookingDate || !startTime || !endTime) {
+      setConflictError("يرجى التأكد من تحديد تاريخ ووقت البدء والانتهاء.");
+      return;
+    }
 
+    const newStart = new Date(`${bookingDate}T${startTime}`);
+    const newEnd = new Date(`${bookingDate}T${endTime}`);
+
+    if (newStart >= newEnd) {
+      setConflictError("وقت الانتهاء يجب أن يكون بعد وقت البدء.");
+      return;
+    }
+
+    const conflict = allBookings.find(existingBooking => {
+      if (booking && existingBooking['رقم الحجز'] === booking['رقم الحجز']) {
+        return false;
+      }
+      if (existingBooking['القاعة'] === formData['القاعة'] && ['معتمد', 'قيد الانتظار'].includes(existingBooking['الحالة'])) {
+        const existingStart = parseCustomDateTime(existingBooking['من']);
+        const existingEnd = parseCustomDateTime(existingBooking['إلى']);
+        if (existingStart && existingEnd) {
+          return newStart < existingEnd && newEnd > existingStart;
+        }
+      }
+      return false;
+    });
+
+    if (conflict) {
+      setConflictError(`يوجد تضارب في الحجز. هذا الوقت محجوز لاجتماع آخر (${conflict['عنوان الاجتماع']}) في نفس القاعة.`);
+      return;
+    }
+
+    const fromISO = newStart.toISOString();
+    const toISO = newEnd.toISOString();
     const fullEmail = emailPrefix ? `${emailPrefix}@rajhifoundation.org` : '';
 
     const dataToSend = {
@@ -198,7 +232,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, rooms, hospitality, 
                     id="booking-date"
                     type="date" 
                     value={bookingDate} 
-                    onChange={(e) => setBookingDate(e.target.value)} 
+                    onChange={(e) => { setBookingDate(e.target.value); setConflictError(null); }} 
                     required 
                     className="appearance-none mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-secondary focus:border-secondary" 
                     min={minDate}
@@ -213,7 +247,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, rooms, hospitality, 
                         value={startTime} 
                         onChange={(e) => {
                             setStartTime(e.target.value);
-                            // Reset end time if it's before the new start time
+                            setConflictError(null);
                             if (endTime && e.target.value > endTime) {
                                 setEndTime('');
                             }
@@ -229,7 +263,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, rooms, hospitality, 
                         id="end-time"
                         type="time" 
                         value={endTime} 
-                        onChange={(e) => setEndTime(e.target.value)} 
+                        onChange={(e) => { setEndTime(e.target.value); setConflictError(null); }} 
                         disabled={!startTime}
                         min={startTime}
                         required 
@@ -265,6 +299,20 @@ const BookingForm: React.FC<BookingFormProps> = ({ booking, rooms, hospitality, 
           <textarea name="الملاحظات" value={formData['الملاحظات']} onChange={handleChange} rows={3} className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"></textarea>
         </div>
       </div>
+      
+      {conflictError && (
+        <div className="p-4 bg-red-50 rounded-md">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <AlertTriangleIcon />
+            </div>
+            <div className="ms-3">
+              <p className="text-sm font-medium text-red-800">{conflictError}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="pt-4 flex justify-end gap-3">
         <button type="button" onClick={onCancel} disabled={isSubmitting} className="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 disabled:opacity-50">
           إلغاء

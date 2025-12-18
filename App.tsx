@@ -175,13 +175,13 @@ const App: React.FC = () => {
     if (!data) return <div className="flex items-center justify-center h-full text-gray-500">لا توجد بيانات لعرضها.</div>;
 
     switch (view) {
-      case 'dashboard': return <Dashboard dashboardData={data.Dashboard} bookings={data.Bookings} />;
+      case 'dashboard': return <Dashboard bookings={data.Bookings} />;
       case 'bookings': return <Bookings initialBookings={data.Bookings} rooms={data.Rooms} hospitality={data.Hospitality} onAddBooking={handleAddBooking} onUpdateBooking={handleUpdateBooking} isSubmitting={isSubmitting} />;
       case 'today': return <TodayBookings bookings={data.Bookings} onRefresh={() => loadData(true)} isRefreshing={isRefreshing} />;
       case 'hospitality': return <Hospitality hospitalityData={data.Hospitality} />;
       case 'rooms': return <Rooms roomsData={data.Rooms} />;
       case 'admin': return <Admin allBookings={data.Bookings} rooms={data.Rooms} hospitality={data.Hospitality} onUpdateBooking={handleUpdateBooking} isSubmitting={isSubmitting} />;
-      default: return <Dashboard dashboardData={data.Dashboard} bookings={data.Bookings} />;
+      default: return <Dashboard bookings={data.Bookings} />;
     }
   };
   

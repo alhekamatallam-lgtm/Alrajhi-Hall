@@ -48,14 +48,15 @@ const Sidebar: React.FC<SidebarProps> = ({ navItems, activeView, setView, isColl
             <li key={item.id}>
               <button
                 onClick={() => setView(item.id as ViewType)}
+                title={isCollapsed ? item.label : undefined}
                 className={`w-full flex items-center p-3 my-1 rounded-lg transition-colors duration-200 text-right ${isCollapsed ? 'justify-center' : ''} ${
                   activeView === item.id
                     ? 'bg-secondary text-white'
                     : 'hover:bg-background'
                 }`}
               >
-                <span className={!isCollapsed ? 'ms-3' : ''}>{iconMap[item.id]}</span>
-                {!isCollapsed && <span className="font-semibold">{item.label}</span>}
+                {iconMap[item.id]}
+                {!isCollapsed && <span className="ms-4 font-semibold">{item.label}</span>}
               </button>
             </li>
           ))}
